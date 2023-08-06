@@ -12,124 +12,96 @@ const btnHold = document.querySelector('.btn--hold');
 const player0 = document.querySelector('.player--0');
 const player1 = document.querySelector('.player--1');
 
-let currentScore = 0;
-let mainScore0 = 0;
-let mainScore1 = 0;
+//function to switch player
+const switchPlayer = function () {
+  //setting active player current score to zero before switching to another player
+  document.getElementById(`current--${activePlayer}`).textContent = 0;
+  currentScore = 0;
 
-//functions to remove and add active class
-const removeActive = function (className) {
-  className.classList.remove('player--active');
-};
-const addActive = function (className) {
-  className.classList.add('player--active');
-};
+  //switching active player
+  activePlayer = activePlayer === 0 ? 1 : 0;
 
-//functions to add and remove winner class
-const removeWinner = function (className) {
-  className.classList.remove('player--winner');
-};
-const addWinner = function (className) {
-  className.classList.add('player--winner');
+  //toggeling active class to change bg color
+  player0.classList.toggle('player--active');
+  player1.classList.toggle('player--active');
 };
 
-//function to check active class in element
-const checkActive = function (className) {
-  return className.classList.contains('player--active');
+let currentScore, scores, activePlayer, playing;
+//starting conditions
+const initialize = function () {
+  //setting all score to 0 on reset
+  score0El.textContent = 0;
+  score1El.textContent = 0;
+  current0El.textContent = 0;
+  current1El.textContent = 0;
+  diceEl.classList.add('hidden');
+
+  currentScore = 0;
+  activePlayer = 0;
+  scores = [0, 0];
+  playing = true;
+
+  //removing winner class from both elements and active class from player 1
+  player0.classList.remove('player--winner');
+  player1.classList.remove('player--winner');
+  player1.classList.remove('player--active');
+
+  //adding player active class to player 0 element
+  player0.classList.add('player--active');
 };
 
-// Starting Conditions
-score0El.textContent = 0;
-score1El.textContent = 0;
-diceEl.classList.add('hidden');
+initialize();
 
 //rolling dice functionality
 btnRoll.addEventListener('click', function () {
-  // 1. Generating a random dice roll
-  const dice = Math.trunc(Math.random() * 6) + 1;
-  // 2. Display the dice
-  diceEl.classList.remove('hidden');
-  diceEl.src = `dice-${dice}.png`;
-  // 3. check for rolled 1:
+  if (playing) {
+    // 1. Generating a random dice roll
+    const dice = Math.trunc(Math.random() * 6) + 1;
+    // 2. Display the dice
+    diceEl.classList.remove('hidden');
+    diceEl.src = `dice-${dice}.png`;
+    // 3. check for rolled 1:
 
-  if (dice != 1) {
-    //add the dice to the current score
-    currentScore += dice;
-    if (checkActive(player0)) {
-      current0El.textContent = currentScore;
-    } else if (checkActive(player1)) {
-      current1El.textContent = currentScore;
-    }
-  } else {
-    //if dice roll is 1, switch player.
-    if (checkActive(player0)) {
-      // switching from player 0 to player 1
-      removeActive(player0);
-      addActive(player1);
-      current0El.textContent = 0;
-      currentScore = 0;
-    } else if (checkActive(player1)) {
-      // switching from player 1 to player 0
-      removeActive(player1);
-      addActive(player0);
-      current1El.textContent = 0;
-      currentScore = 0;
+    if (dice != 1) {
+      //add the dice to the current score
+      currentScore += dice;
+      document.getElementById(`current--${activePlayer}`).textContent =
+        currentScore;
+    } else {
+      //if dice roll is 1, switch player.
+      switchPlayer();
     }
   }
 });
 
 // hold button functionality
 btnHold.addEventListener('click', function () {
-  // 1.add current score to total score
-  // 2.if score > 100, current player wins
-  //3. if score is not >= 100 switch player
+  if (playing) {
+    // 1.add current score to active player total score
+    scores[activePlayer] += currentScore;
+    document.getElementById(`score--${activePlayer}`).textContent =
+      scores[activePlayer];
 
-  if (checkActive(player0)) {
-    // 1.add current score to total score
-    mainScore0 += currentScore;
-    score0El.textContent = mainScore0;
-    current0El.textContent = 0;
-    currentScore = 0;
+    // 2.if score > 100, active player wins
+    if (scores[activePlayer] >= 100) {
+      //making playing variable false so that buttons don't respons once the player wins the game
+      playing = false;
+      diceEl.classList.add('hidden');
 
-    if (score0El.textContent >= 100) {
-      addWinner(player0);
-      removeActive(player0);
-      removeActive(player1);
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.add('player--winner');
+
+      //removing active player class from the winner player
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.remove('player--active');
     } else {
-      removeActive(player0);
-      addActive(player1);
-    }
-  } else if (checkActive(player1)) {
-    mainScore1 += currentScore;
-    score1El.textContent = mainScore1;
-    current1El.textContent = 0;
-    currentScore = 0;
-
-    if (score1El.textContent >= 100) {
-      addWinner(player1);
-      removeActive(player0);
-      removeActive(player1);
-    } else {
-      removeActive(player1);
-      addActive(player0);
+      //3. if score is not >= 100 switch player
+      switchPlayer();
     }
   }
 });
 
 // Reset game button
-btnNew.addEventListener('click', function () {
-  addActive(player0);
-  removeActive(player1);
-
-  if (player0.classList.contains('player--winner')) {
-    removeWinner(player0);
-  } else {
-    removeWinner(player1);
-  }
-
-  score0El.textContent = 0;
-  score1El.textContent = 0;
-  current0El.textContent = 0;
-  current1El.textContent = 0;
-  mainScore0 = 0;
-  mainScore1 = 0;
-});
+btnNew.addEventListener('click', initialize);
