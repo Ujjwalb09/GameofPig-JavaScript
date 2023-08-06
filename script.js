@@ -90,3 +90,22 @@ btnHold.addEventListener('click', function () {
     }
   }
 });
+
+// Reset game button
+btnNew.addEventListener('click', function () {
+  player0.classList.add('player--active');
+  player1.classList.remove('player--active');
+
+  if (player0.classList.contains('player--winner')) {
+    player0.classList.remove('player--winner');
+  } else {
+    player1.classList.remove('player--winner');
+  }
+
+  score0El.textContent = 0;
+  score1El.textContent = 0;
+  current0El.textContent = 0;
+  current1El.textContent = 0;
+  mainScore0 = 0;
+  mainScore1 = 0;
+});
