@@ -16,6 +16,27 @@ let currentScore = 0;
 let mainScore0 = 0;
 let mainScore1 = 0;
 
+//functions to remove and add active class
+const removeActive = function (className) {
+  className.classList.remove('player--active');
+};
+const addActive = function (className) {
+  className.classList.add('player--active');
+};
+
+//functions to add and remove winner class
+const removeWinner = function (className) {
+  className.classList.remove('player--winner');
+};
+const addWinner = function (className) {
+  className.classList.add('player--winner');
+};
+
+//function to check active class in element
+const checkActive = function (className) {
+  return className.classList.contains('player--active');
+};
+
 // Starting Conditions
 score0El.textContent = 0;
 score1El.textContent = 0;
@@ -25,7 +46,6 @@ diceEl.classList.add('hidden');
 btnRoll.addEventListener('click', function () {
   // 1. Generating a random dice roll
   const dice = Math.trunc(Math.random() * 6) + 1;
-  console.log(dice);
   // 2. Display the dice
   diceEl.classList.remove('hidden');
   diceEl.src = `dice-${dice}.png`;
@@ -34,23 +54,23 @@ btnRoll.addEventListener('click', function () {
   if (dice != 1) {
     //add the dice to the current score
     currentScore += dice;
-    if (player0.classList.contains('player--active')) {
+    if (checkActive(player0)) {
       current0El.textContent = currentScore;
-    } else {
+    } else if (checkActive(player1)) {
       current1El.textContent = currentScore;
     }
   } else {
     //if dice roll is 1, switch player.
-    if (player0.classList.contains('player--active')) {
+    if (checkActive(player0)) {
       // switching from player 0 to player 1
-      player0.classList.remove('player--active');
-      player1.classList.add('player--active');
+      removeActive(player0);
+      addActive(player1);
       current0El.textContent = 0;
       currentScore = 0;
-    } else {
+    } else if (checkActive(player1)) {
       // switching from player 1 to player 0
-      player1.classList.remove('player--active');
-      player0.classList.add('player--active');
+      removeActive(player1);
+      addActive(player0);
       current1El.textContent = 0;
       currentScore = 0;
     }
@@ -63,7 +83,7 @@ btnHold.addEventListener('click', function () {
   // 2.if score > 100, current player wins
   //3. if score is not >= 100 switch player
 
-  if (player0.classList.contains('player--active')) {
+  if (checkActive(player0)) {
     // 1.add current score to total score
     mainScore0 += currentScore;
     score0El.textContent = mainScore0;
@@ -71,35 +91,39 @@ btnHold.addEventListener('click', function () {
     currentScore = 0;
 
     if (score0El.textContent >= 100) {
-      player0.classList.add('player--winner');
+      addWinner(player0);
+      removeActive(player0);
+      removeActive(player1);
     } else {
-      player0.classList.remove('player--active');
-      player1.classList.add('player--active');
+      removeActive(player0);
+      addActive(player1);
     }
-  } else {
+  } else if (checkActive(player1)) {
     mainScore1 += currentScore;
     score1El.textContent = mainScore1;
     current1El.textContent = 0;
     currentScore = 0;
 
     if (score1El.textContent >= 100) {
-      player1.classList.add('player--winner');
+      addWinner(player1);
+      removeActive(player0);
+      removeActive(player1);
     } else {
-      player1.classList.remove('player--active');
-      player0.classList.add('player--active');
+      removeActive(player1);
+      addActive(player0);
     }
   }
 });
 
 // Reset game button
 btnNew.addEventListener('click', function () {
-  player0.classList.add('player--active');
-  player1.classList.remove('player--active');
+  addActive(player0);
+  removeActive(player1);
 
   if (player0.classList.contains('player--winner')) {
-    player0.classList.remove('player--winner');
+    removeWinner(player0);
   } else {
-    player1.classList.remove('player--winner');
+    removeWinner(player1);
   }
 
   score0El.textContent = 0;
